@@ -1,0 +1,40 @@
+---
+- name: Install and configure web server
+  hosts: web-server
+  become: true
+
+  vars:
+    ssl_key_path: /etc/ssl/private/nginx-selfsigned.key
+    ssl_cert_path: /etc/ssl/certs/nginx-selfsigned.crt
+
+  tasks:
+  - name: Install Nginx
+    apt:
+      name: nginx
+      state: present
+
+  - name: Copy index.html file
+    copy:
+      src: index.html
+      dest: /var/www/html/index.html
+
+  - name: Copy SSL/TLS certificate and key
+    copy:
+      src: "{{ item }}"
+      dest: "{{ item }}"
+    with_items:
+      - "{{ ssl_key_path }}"
+      - "{{ ssl_cert_path }}"
+
+  - name: Configure Nginx for SSL/TLS
+    copy:
+      src: nginx.conf
+      dest: /etc/nginx/nginx.conf
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Start Nginx service
+    service:
+      name: nginx
+      state: started

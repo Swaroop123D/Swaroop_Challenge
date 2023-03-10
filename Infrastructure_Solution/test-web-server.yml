@@ -1,0 +1,15 @@
+---
+- name: Test web server configuration
+  hosts: web-server
+  become: true
+
+  tasks:
+  - name: Check Nginx status
+    shell: systemctl status nginx
+    register: nginx_status
+
+  - name: Verify Nginx is running
+    assert:
+      that: "'active (running)' in nginx_status.stdout"
+      success_msg: "Nginx is running"
+      fail_msg: "Nginx is not running"
